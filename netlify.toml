@@ -33,11 +33,4 @@
 # Handle common build failures
 [build.lifecycle]
   onBuild = "echo 'Running custom build script...'"
-  onError = "echo 'Error detected, checking logs...'"
-
-# Add build plugins
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-  
-  [plugins.inputs]
-  enable = false 
+  onError = "echo 'Error detected, checking logs...'" 

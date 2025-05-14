@@ -31,9 +31,45 @@ function runCommand(command, errorMessage) {
   }
 }
 
+// Check for unavailable packages and remove them from dependencies
+function checkDependencies() {
+  try {
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    let hasChanges = false;
+    
+    // Check if there are any unnecessary or conflicting packages
+    const problematicPackages = ['@netlify/plugin-nextjs'];
+    
+    for (const pkg of problematicPackages) {
+      if (packageJson.dependencies && packageJson.dependencies[pkg]) {
+        log(`Removing problematic package: ${pkg}`, colors.yellow);
+        delete packageJson.dependencies[pkg];
+        hasChanges = true;
+      }
+      if (packageJson.devDependencies && packageJson.devDependencies[pkg]) {
+        log(`Removing problematic package: ${pkg}`, colors.yellow);
+        delete packageJson.devDependencies[pkg];
+        hasChanges = true;
+      }
+    }
+    
+    // Write back package.json if changes were made
+    if (hasChanges) {
+      fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
+      log('Updated package.json to remove problematic dependencies', colors.green);
+    }
+  } catch (error) {
+    log(`Warning: Could not check dependencies: ${error.message}`, colors.yellow);
+  }
+}
+
 // Main build function
 async function main() {
   log('🚀 Starting Netlify build process...', colors.green);
+  
+  // Check for any potential issues with plugins or dependencies
+  log('🔍 Checking dependencies...', colors.blue);
+  checkDependencies();
   
   // Ensure correct node version
   log('Checking Node.js version...', colors.blue);
@@ -66,7 +102,11 @@ async function main() {
   // Run build with environment variables to ignore warnings
   log('🏗️ Building the project...', colors.blue);
   if (!runCommand('CI=false VITE_CJS_IGNORE_WARNING=true npm run netlify-build', 'Build failed')) {
-    process.exit(1);
+    // If netlify-build script fails, try the regular build as fallback
+    log('Attempting to run regular build as fallback...', colors.yellow);
+    if (!runCommand('CI=false VITE_CJS_IGNORE_WARNING=true npm run build', 'Build failed again')) {
+      process.exit(1);
+    }
   }
   
   log('✅ Build completed successfully!', colors.green);
