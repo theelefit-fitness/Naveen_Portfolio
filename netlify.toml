@@ -1,5 +1,5 @@
 [build]
-  command = "node netlify-build.js"
+  command = "node --experimental-modules netlify-build.js || node build.js"
   publish = "dist"
 
 # Handle SPA routing by redirecting all requests to index.html
@@ -25,6 +25,7 @@
   NODE_VERSION = "18" # Ensure compatible Node version
   NPM_FLAGS = "--legacy-peer-deps --no-audit --no-fund"
   VITE_CJS_IGNORE_WARNING = "true"
+  NODE_OPTIONS = "--experimental-modules"
 
 # Optimize build settings
 [build.processing]
