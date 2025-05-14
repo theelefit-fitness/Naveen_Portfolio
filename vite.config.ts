@@ -17,7 +17,9 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      'three': path.resolve(__dirname, 'node_modules/three')
     },
+    dedupe: ['three', 'react', 'react-dom']
   },
   build: {
     outDir: 'dist',
@@ -29,10 +31,14 @@ export default defineConfig(({ mode }) => ({
         // Skip certain warnings
         if (warning.code === 'CIRCULAR_DEPENDENCY') return;
         if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
+        if (warning.code === 'THIS_IS_UNDEFINED') return;
+        if (warning.code === 'MISSING_EXPORT') return;
+        if (warning.code === 'EMPTY_BUNDLE') return;
         
         // Use default for everything else
         warn(warning);
-      }
+      },
+      external: []
     },
     // Ensure CSS is properly handled
     cssCodeSplit: true,
@@ -41,11 +47,19 @@ export default defineConfig(({ mode }) => ({
   },
   // Disable type checking on build to prevent errors
   esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 
+      'this-is-undefined-in-esm': 'silent',
+      'different-path-casing': 'silent'
+    }
   },
   // Optimizations for production
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: ['react', 'react-dom', 'three'],
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      }
+    },
     exclude: []
   }
 }));

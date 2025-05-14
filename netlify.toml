@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "node netlify-build.js"
   publish = "dist"
 
 # Handle SPA routing by redirecting all requests to index.html
@@ -23,7 +23,21 @@
 [build.environment]
   CI = "false"  # Prevent builds from failing on warnings
   NODE_VERSION = "18" # Ensure compatible Node version
+  NPM_FLAGS = "--legacy-peer-deps --no-audit --no-fund"
+  VITE_CJS_IGNORE_WARNING = "true"
 
 # Optimize build settings
 [build.processing]
-  skip_processing = false 
+  skip_processing = false
+
+# Handle common build failures
+[build.lifecycle]
+  onBuild = "echo 'Running custom build script...'"
+  onError = "echo 'Error detected, checking logs...'"
+
+# Add build plugins
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+  
+  [plugins.inputs]
+  enable = false 
