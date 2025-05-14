@@ -1,0 +1,205 @@
+/* Projects Section */
+.projects-section {
+  padding: 100px 0;
+  background-color: white;
+}
+
+.projects-container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  padding: 0 20px;
+}
+
+.projects-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.projects-header h2 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.header-underline {
+  height: 4px;
+  width: 60px;
+  background: var(--accent-color);
+  margin: 0 auto;
+  margin-bottom: 20px;
+  border-radius: 2px;
+}
+
+.projects-header p {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.projects-wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 30px;
+}
+
+.project-item {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative; /* Important for the pseudo-element */
+  z-index: 1;
+}
+.project-item::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(61, 90, 241, 0.15), rgba(61, 90, 241, 0.3));
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes projectScanDown {
+  0% {
+    top: -100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.project-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+.project-item:hover::before {
+  animation: projectScanDown 1s forwards;
+  opacity: 1;
+}
+
+/* Ensure all child content stays above the scanning layer */
+.project-content,
+.project-tag,
+.project-description,
+.project-impact,
+.project-tech-stack {
+  position: relative;
+  z-index: 1;
+}
+.project-content {
+  padding: 30px;
+}
+
+.project-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(61, 90, 241, 0.1);
+  color: var(--primary-color);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.project-content h3 {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.project-description {
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.project-impact {
+  background: rgba(61, 90, 241, 0.05);
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.impact-label {
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-right: 5px;
+}
+
+.project-tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tech-item {
+  background: rgba(61, 90, 241, 0.05);
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Media Queries */
+@media screen and (max-width: 992px) {
+  .projects-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+  
+  .projects-header h2 {
+    font-size: 2.2rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .projects-section {
+    padding: 70px 0;
+  }
+  
+  .projects-wrapper {
+    grid-template-columns: 1fr;
+  }
+  
+  .projects-header {
+    margin-bottom: 40px;
+  }
+  
+  .projects-header h2 {
+    font-size: 2rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .projects-section {
+    padding: 50px 0;
+  }
+  
+  .projects-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .project-content {
+    padding: 25px;
+  }
+  
+  .project-content h3 {
+    font-size: 1.3rem;
+  }
+} 

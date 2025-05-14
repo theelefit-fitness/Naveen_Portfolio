@@ -1,0 +1,156 @@
+.about {
+  background-color: white;
+  position: relative;
+}
+
+.about-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4rem;
+}
+
+.about-image {
+  flex: 1;
+  position: relative;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* Maintains square aspect ratio */
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.profile-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures image fills container without distortion */
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; /* Matches blob-bg */
+  animation: blob-animation 8s ease-in-out infinite; /* Same animation as blob-bg */
+  z-index: 1; /* Places image above blob-bg */
+}
+
+.blob-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(61, 90, 241, 0.1);
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: blob-animation 8s ease-in-out infinite;
+  z-index: 0; /* Places background behind image */
+}
+
+@keyframes blob-animation {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+}
+
+.about-text {
+  flex: 1.5;
+  padding-right: 2rem;
+}
+
+.about-text h3 {
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.about-text h3::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 3px;
+  background: var(--accent-color);
+  bottom: -10px;
+  left: 0;
+}
+
+.about-text p {
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+  color: var(--text-color);
+  line-height: 1.8;
+}
+
+.about-highlights {
+  display: flex;
+  margin-top: 2.5rem;
+  gap: 2rem;
+}
+
+.highlight {
+  text-align: center;
+}
+
+.highlight h4 {
+  font-size: 2rem;
+  color: var(--accent-color);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.highlight p {
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 992px) {
+  .about-content {
+    gap: 2rem;
+  }
+  .about-text {
+    padding-right: 0;
+  }
+  .about-highlights {
+    gap: 1.5rem;
+  }
+  .highlight h4 {
+    font-size: 1.8rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .about-content {
+    flex-direction: column;
+  }
+  .about-image {
+    width: 80%;
+    margin: 0 auto;
+  }
+  .about-text {
+    text-align: center;
+  }
+  .about-text h3::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .about-highlights {
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .about-highlights {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .about-image {
+    width: 100%;
+  }
+}

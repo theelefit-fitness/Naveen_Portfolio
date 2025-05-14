@@ -1,0 +1,221 @@
+.experience {
+  padding: 100px 0;
+  background-color: white;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.section-title h2 {
+  font-size: 2.5rem;
+  color: var(--text-color);
+  margin-bottom: 15px;
+  position: relative;
+  display: inline-block;
+}
+
+.section-title .underline {
+  height: 4px;
+  width: 70px;
+  background: var(--primary-color);
+  margin: 0 auto;
+  margin-top: 10px;
+}
+
+.timeline {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px 0;
+}
+
+.timeline:before {
+  content: '';
+  position: absolute;
+  width: 4px;
+  background-color: rgba(61, 90, 241, 0.2);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 10px;
+}
+
+.timeline-item {
+  position: relative;
+  width: 47%;
+  padding: 0 25px 60px 25px;
+}
+
+.timeline-item:nth-child(odd) {
+  left: 0;
+}
+
+.timeline-item:nth-child(even) {
+  left: 53%;
+}
+
+.timeline-dot {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  top: 15px;
+  border: 4px solid white;
+  box-shadow: 0 0 0 4px rgba(61, 90, 241, 0.2);
+  z-index: 1;
+}
+
+.timeline-item:nth-child(odd) .timeline-dot {
+  right: -35px;
+}
+
+.timeline-item:nth-child(even) .timeline-dot {
+  left: -35px;
+}
+
+.timeline-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+  box-shadow: 0 10px 35px 5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.timeline-header {
+  margin-bottom: 15px;
+}
+
+.timeline-header h3 {
+  font-size: 1.3rem;
+  color: var(--text-color);
+  margin-bottom: 6px;
+}
+
+.timeline-header .company {
+  display: block;
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.timeline-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.period {
+  display: inline-block;
+  background-color: rgba(61, 90, 241, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.location {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.timeline-item.current .timeline-content {
+  border-left: 4px solid var(--primary-color);
+}
+
+.timeline-item.current .period {
+  background-color: rgba(61, 90, 241, 0.2);
+  font-weight: 600;
+}
+
+.experience-cta {
+  text-align: center;
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+@media screen and (max-width: 992px) {
+  .timeline:before {
+    left: 40px;
+  }
+  
+  .timeline-item {
+    width: 100%;
+    padding-left: 80px;
+    padding-right: 0;
+    left: 0 !important;
+  }
+  
+  .timeline-item .timeline-dot {
+    left: 30px !important;
+    right: auto !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .experience {
+    padding: 80px 0;
+  }
+  
+  .section-title h2 {
+    font-size: 2.2rem;
+  }
+  
+  .timeline-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .timeline-header .company {
+    font-size: 1rem;
+  }
+  
+  .experience-cta {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .experience-cta .btn {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .experience {
+    padding: 60px 0;
+  }
+  
+  .timeline-content {
+    padding: 20px;
+  }
+  
+  .section-title h2 {
+    font-size: 1.8rem;
+  }
+  
+  .timeline:before {
+    left: 25px;
+  }
+  
+  .timeline-item {
+    padding-left: 60px;
+  }
+  
+  .timeline-item .timeline-dot {
+    left: 15px !important;
+    width: 16px;
+    height: 16px;
+  }
+}
