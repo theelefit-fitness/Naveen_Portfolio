@@ -1,15 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { createSafeRenderer, fixWindowReferences } from '../three-patch';
+import SafeWebGL from './SafeWebGL';
 import '../styles/Hero.css';
 
 const Hero = () => {
   const canvasRef = useRef(null);
   const bgCanvasRef = useRef(null);
   const pageRef = useRef(null);
+  const [webGLInitialized, setWebGLInitialized] = useState(false);
 
+  // Dynamic 3D content
   useEffect(() => {
+    if (!webGLInitialized) return;
+    
     let renderer, scene, camera;
     let bgRenderer, bgScene, bgCamera, controls;
     let width, height, wWidth, wHeight;
@@ -21,232 +27,259 @@ const Hero = () => {
     
     // Initialize renderer and scene
     const initThree = () => {
-      renderer = new THREE.WebGLRenderer({ 
-        canvas: canvasRef.current, 
-        antialias: true, 
-        alpha: true 
-      });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 75;
-      
-      scene = new THREE.Scene();
-      
-      // Add ambient light with subtle blue tint
-      scene.add(new THREE.AmbientLight(0x00CDFE, 1));
-      scene.add(new THREE.AmbientLight(0xFFFFFF, 1))
-      // Add point light with white color
-      const light = new THREE.PointLight(0xffffff, 1.2);
-      light.position.z = 100;
-      scene.add(light);
-      
-      onResize();
-      window.addEventListener('resize', onResize);
-      
-      initObjects();
-      animate();
-      
-      // Add loaded class to show content
-      document.querySelector('.hero').classList.add('loaded');
-      
-      // Start animation
-      startAnim();
+      try {
+        // Use createSafeRenderer from three-patch instead of direct THREE.WebGLRenderer creation
+        renderer = createSafeRenderer({ 
+          canvas: canvasRef.current, 
+          antialias: true, 
+          alpha: true 
+        });
+        
+        if (!renderer) {
+          throw new Error('Failed to create renderer');
+        }
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 75;
+        
+        scene = new THREE.Scene();
+        
+        // Add ambient light with subtle blue tint
+        scene.add(new THREE.AmbientLight(0x00CDFE, 1));
+        scene.add(new THREE.AmbientLight(0xFFFFFF, 1));
+        
+        // Add point light with white color
+        const light = new THREE.PointLight(0xffffff, 1.2);
+        light.position.z = 100;
+        scene.add(light);
+        
+        onResize();
+        window.addEventListener('resize', onResize);
+        
+        initObjects();
+        animate();
+        
+        // Add loaded class to show content
+        document.querySelector('.hero').classList.add('loaded');
+        
+        // Start animation
+        startAnim();
+      } catch (error) {
+        console.error('Error initializing Three.js:', error);
+        // Show content immediately if initialization fails
+        document.querySelector('.hero').classList.add('loaded');
+        document.querySelector('.hero').classList.add('revealed');
+        const heroContent = document.querySelector('.hero-content');
+        heroContent.classList.add('appear');
+      }
     };
 
     // Initialize background animation
     const initBackgroundAnimation = () => {
-      bgRenderer = new THREE.WebGLRenderer({
-        canvas: bgCanvasRef.current,
-        antialias: true,
-        alpha: true
-      });
-      bgRenderer.setSize(window.innerWidth, window.innerHeight);
-      bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      
-      bgCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-      bgCamera.position.z = 30;
-      bgCamera.position.y = 5;
-      
-      bgScene = new THREE.Scene();
-
-      // Add orbit controls for interactivity
-      controls = new OrbitControls(bgCamera, bgCanvasRef.current);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.enableZoom = false;
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.5;
-
-      // Create a group to hold all objects
-      const mainGroup = new THREE.Group();
-      bgScene.add(mainGroup);
-
-      // Create a modern 3D AEM logo-inspired shape
-      const aemLogoGroup = createAEMLogo();
-      aemLogoGroup.position.x = 5;
-      mainGroup.add(aemLogoGroup);
-
-      // Create floating particles
-      const particles = createParticles();
-      mainGroup.add(particles);
-
-      // Create flowing data streams
-      const dataStreams = createDataStreams();
-      mainGroup.add(dataStreams);
-
-      // Create a floating geometric platform
-      const platform = createPlatform();
-      platform.position.y = -10;
-      mainGroup.add(platform);
-
-      // Add lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      bgScene.add(ambientLight);
-      
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(5, 10, 7);
-      bgScene.add(directionalLight);
-
-      // Add a subtle blue point light for accent
-      const blueLight = new THREE.PointLight(0x3d5af1, 1);
-      blueLight.position.set(-10, 5, 10);
-      bgScene.add(blueLight);
-
-      // Add a subtle pink point light for accent
-      const pinkLight = new THREE.PointLight(0xff6a88, 0.8);
-      pinkLight.position.set(10, -5, 10);
-      bgScene.add(pinkLight);
-      
-      // Animation function
-      bgAnimation = () => {
-        // Update controls
-        controls.update();
+      try {
+        // Use createSafeRenderer for background animation too
+        bgRenderer = createSafeRenderer({
+          canvas: bgCanvasRef.current,
+          antialias: true,
+          alpha: true
+        });
         
-        // Animate particles
-        if (particles) {
-          particles.rotation.y += 0.0005;
-          particles.children.forEach(particle => {
-            // Digital pulsing effect
-            const time = Date.now() * 0.001;
-            const pulseFactor = Math.sin(time + particle.position.x * 0.1) * 0.1 + 1;
-            particle.scale.set(
-              particle.userData.originalScale ? particle.userData.originalScale * pulseFactor : pulseFactor,
-              particle.userData.originalScale ? particle.userData.originalScale * pulseFactor : pulseFactor,
-              particle.userData.originalScale ? particle.userData.originalScale * pulseFactor : pulseFactor
-            );
-            
-            // Store original scale if not already stored
-            if (!particle.userData.originalScale) {
-              particle.userData.originalScale = particle.scale.x / pulseFactor;
-            }
-            
-            // Subtle rotation
-            particle.rotation.x += 0.005 * Math.random();
-            particle.rotation.z += 0.005 * Math.random();
-          });
+        if (!bgRenderer) {
+          throw new Error('Failed to create background renderer');
         }
+        
+        bgRenderer.setSize(window.innerWidth, window.innerHeight);
+        bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        bgCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        bgCamera.position.z = 30;
+        bgCamera.position.y = 5;
+        
+        bgScene = new THREE.Scene();
 
-        // Animate data streams
-        if (dataStreams) {
-          dataStreams.children.forEach((stream, i) => {
-            // Move data packets along the streams
-            stream.children.forEach((packet, j) => {
-              if (j > 0) { // Skip the tube itself (first child)
-                packet.position.y -= 0.1 * (i % 3 + 1);
-                
-                // Reset position when it goes below the stream
-                if (packet.position.y < -10) {
-                  packet.position.y = 10;
+        // Add orbit controls for interactivity
+        controls = new OrbitControls(bgCamera, bgCanvasRef.current);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = false;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+
+        // Create a group to hold all objects
+        const mainGroup = new THREE.Group();
+        bgScene.add(mainGroup);
+
+        // Create a modern 3D AEM logo-inspired shape
+        const aemLogoGroup = createAEMLogo();
+        aemLogoGroup.position.x = 5;
+        mainGroup.add(aemLogoGroup);
+
+        // Create floating particles
+        const particles = createParticles();
+        mainGroup.add(particles);
+
+        // Create flowing data streams
+        const dataStreams = createDataStreams();
+        mainGroup.add(dataStreams);
+
+        // Create a floating geometric platform
+        const platform = createPlatform();
+        platform.position.y = -10;
+        mainGroup.add(platform);
+
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        bgScene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 7);
+        bgScene.add(directionalLight);
+
+        // Add a subtle blue point light for accent
+        const blueLight = new THREE.PointLight(0x4A86E8, 1);
+        blueLight.position.set(-10, 5, 10);
+        bgScene.add(blueLight);
+
+        // Add a subtle teal point light for accent
+        const tealLight = new THREE.PointLight(0x55D6C2, 0.8);
+        tealLight.position.set(10, -5, 10);
+        bgScene.add(tealLight);
+        
+        // Animation function
+        const runBgAnimation = () => {
+          // Update controls
+          controls.update();
+          
+          // Animate particles
+          if (particles) {
+            particles.rotation.y += 0.0005;
+            particles.children.forEach(particle => {
+              // Digital pulsing effect
+              const time = Date.now() * 0.001;
+              const pulseFactor = Math.sin(time + particle.position.x * 0.1) * 0.1 + 1;
+              particle.scale.set(
+                particle.userData.originalScale ? particle.userData.originalScale * pulseFactor : pulseFactor,
+                particle.userData.originalScale ? particle.userData.originalScale * pulseFactor : pulseFactor,
+                particle.userData.originalScale ? particle.userData.originalScale * pulseFactor : pulseFactor
+              );
+              
+              // Store original scale if not already stored
+              if (!particle.userData.originalScale) {
+                particle.userData.originalScale = particle.scale.x / pulseFactor;
+              }
+              
+              // Subtle rotation
+              particle.rotation.x += 0.005 * Math.random();
+              particle.rotation.z += 0.005 * Math.random();
+            });
+          }
+
+          // Animate data streams
+          if (dataStreams) {
+            dataStreams.children.forEach((stream, i) => {
+              // Move data packets along the streams
+              stream.children.forEach((packet, j) => {
+                if (j > 0) { // Skip the tube itself (first child)
+                  packet.position.y -= 0.1 * (i % 3 + 1);
+                  
+                  // Reset position when it goes below the stream
+                  if (packet.position.y < -10) {
+                    packet.position.y = 10;
+                  }
+                  
+                  // Digital pulse effect
+                  const time = Date.now() * 0.001;
+                  const pulseScale = Math.sin(time * 3 + j) * 0.2 + 1;
+                  packet.scale.set(pulseScale, pulseScale, pulseScale);
+                  
+                  // Get position on the curve
+                  const t = (packet.position.y + 10) / 20;
+                  if (stream.children[0].geometry.parameters && stream.children[0].geometry.parameters.path) {
+                    const curve = stream.children[0].geometry.parameters.path;
+                    const point = curve.getPointAt(Math.max(0, Math.min(1, t)));
+                    packet.position.x = point.x;
+                    packet.position.z = point.z;
+                  }
                 }
+              });
+            });
+          }
+
+          // Animate AEM logo
+          if (aemLogoGroup) {
+            // More digital, less fluid rotation
+            aemLogoGroup.rotation.y += 0.005;
+            
+            // Digital transformation effect
+            const time = Date.now() * 0.001;
+            aemLogoGroup.children.forEach((ring, i) => {
+              if (i < aemLogoGroup.children.length - 1) { // Skip the central sphere
+                // Digital wave effect
+                ring.rotation.x = Math.sin(time * 0.5 + i * 1.5) * 0.2;
+                ring.rotation.z = Math.cos(time * 0.5 + i * 1.5) * 0.2;
                 
-                // Digital pulse effect
-                const time = Date.now() * 0.001;
-                const pulseScale = Math.sin(time * 3 + j) * 0.2 + 1;
-                packet.scale.set(pulseScale, pulseScale, pulseScale);
+                // Pulsing effect
+                const scaleFactor = Math.sin(time + i) * 0.05 + 1;
+                ring.scale.set(scaleFactor, scaleFactor, scaleFactor);
+              } else {
+                // Central sphere pulse
+                const sphereScale = Math.sin(time * 2) * 0.1 + 1;
+                ring.scale.set(sphereScale, sphereScale, sphereScale);
+              }
+            });
+          }
+          
+          // Animate circuit nodes on the platform
+          if (platform && platform.children.length > 1 && platform.children[1].children) {
+            const circuitGroup = platform.children[1];
+            const time = Date.now() * 0.001;
+            
+            // Animate circuit nodes
+            circuitGroup.children.forEach((element, i) => {
+              if (element instanceof THREE.Mesh) {
+                // Pulse effect for nodes
+                const pulseScale = Math.sin(time * 2 + i) * 0.3 + 1;
+                element.scale.set(pulseScale, pulseScale, pulseScale);
                 
-                // Get position on the curve
-                const t = (packet.position.y + 10) / 20;
-                if (stream.children[0].geometry.parameters && stream.children[0].geometry.parameters.path) {
-                  const curve = stream.children[0].geometry.parameters.path;
-                  const point = curve.getPointAt(Math.max(0, Math.min(1, t)));
-                  packet.position.x = point.x;
-                  packet.position.z = point.z;
+                // Pulse emissive intensity
+                if (element.material) {
+                  element.material.emissiveIntensity = Math.sin(time * 3 + i) * 0.2 + 0.3;
                 }
               }
             });
-          });
-        }
-
-        // Animate AEM logo
-        if (aemLogoGroup) {
-          // More digital, less fluid rotation
-          aemLogoGroup.rotation.y += 0.005;
+          }
           
-          // Digital transformation effect
-          const time = Date.now() * 0.001;
-          aemLogoGroup.children.forEach((ring, i) => {
-            if (i < aemLogoGroup.children.length - 1) { // Skip the central sphere
-              // Digital wave effect
-              ring.rotation.x = Math.sin(time * 0.5 + i * 1.5) * 0.2;
-              ring.rotation.z = Math.cos(time * 0.5 + i * 1.5) * 0.2;
-              
-              // Pulsing effect
-              const scaleFactor = Math.sin(time + i) * 0.05 + 1;
-              ring.scale.set(scaleFactor, scaleFactor, scaleFactor);
-            } else {
-              // Central sphere pulse
-              const sphereScale = Math.sin(time * 2) * 0.1 + 1;
-              ring.scale.set(sphereScale, sphereScale, sphereScale);
-            }
-          });
-        }
+          bgRenderer.render(bgScene, bgCamera);
+          bgAnimation = requestAnimationFrame(runBgAnimation);
+        };
         
-        // Animate circuit nodes on the platform
-        if (platform && platform.children.length > 1 && platform.children[1].children) {
-          const circuitGroup = platform.children[1];
-          const time = Date.now() * 0.001;
-          
-          // Animate circuit nodes
-          circuitGroup.children.forEach((element, i) => {
-            if (element instanceof THREE.Mesh) {
-              // Pulse effect for nodes
-              const pulseScale = Math.sin(time * 2 + i) * 0.3 + 1;
-              element.scale.set(pulseScale, pulseScale, pulseScale);
-              
-              // Pulse emissive intensity
-              if (element.material) {
-                element.material.emissiveIntensity = Math.sin(time * 3 + i) * 0.2 + 0.3;
-              }
-            }
-          });
-        }
+        // Start background animation
+        bgAnimation = requestAnimationFrame(runBgAnimation);
         
-        bgRenderer.render(bgScene, bgCamera);
-        requestAnimationFrame(bgAnimation);
-      };
-      
-      // Start background animation
-      bgAnimation();
-      
-      // Handle resize for background
-      const handleBgResize = () => {
-        bgCamera.aspect = window.innerWidth / window.innerHeight;
-        bgCamera.updateProjectionMatrix();
-        bgRenderer.setSize(window.innerWidth, window.innerHeight);
-      };
-      
-      window.addEventListener('resize', handleBgResize);
-      
-      return () => {
-        window.removeEventListener('resize', handleBgResize);
-        if (bgAnimation) {
-          cancelAnimationFrame(bgAnimation);
-        }
-        controls.dispose();
-        bgScene.dispose();
-        bgRenderer.dispose();
-      };
+        // Handle resize for background
+        const handleBgResize = () => {
+          bgCamera.aspect = window.innerWidth / window.innerHeight;
+          bgCamera.updateProjectionMatrix();
+          bgRenderer.setSize(window.innerWidth, window.innerHeight);
+        };
+        
+        window.addEventListener('resize', handleBgResize);
+        
+        return () => {
+          window.removeEventListener('resize', handleBgResize);
+          if (bgAnimation) {
+            cancelAnimationFrame(bgAnimation);
+          }
+          controls.dispose();
+          bgScene.dispose();
+          bgRenderer.dispose();
+        };
+      } catch (error) {
+        console.error('Error initializing background animation:', error);
+        // Allow the page to be viewed without animation if there's an error
+      }
     };
 
     // Create AEM-inspired logo
@@ -260,10 +293,10 @@ const Hero = () => {
         new THREE.TorusGeometry(3, 0.2, 16, 50)
       ];
       
-      // Use white material with slight transparency, no metalness
+      // Use updated color palette
       const materials = [
         new THREE.MeshStandardMaterial({
-          color: 0xffffff,
+          color: 0x4A86E8, // Professional blue
           metalness: 0.1,
           roughness: 0.8,
           transparent: true,
@@ -271,7 +304,7 @@ const Hero = () => {
           side: THREE.DoubleSide
         }),
         new THREE.MeshStandardMaterial({
-          color: 0x3d5af1,
+          color: 0x7FACDE, // Lighter blue
           metalness: 0.1,
           roughness: 0.8,
           transparent: true,
@@ -279,7 +312,7 @@ const Hero = () => {
           side: THREE.DoubleSide
         }),
         new THREE.MeshStandardMaterial({
-          color: 0xff6a88,
+          color: 0x55D6C2, // Teal accent
           metalness: 0.1,
           roughness: 0.8,
           transparent: true,
@@ -299,7 +332,7 @@ const Hero = () => {
       // Add a central sphere
       const sphereGeometry = new THREE.SphereGeometry(1.5, 32, 32);
       const sphereMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
+        color: 0x4A86E8, // Professional blue
         metalness: 0.1,
         roughness: 0.8,
         transparent: true,
@@ -357,7 +390,7 @@ const Hero = () => {
         // Add some emissive to 30% of particles for digital glow effect
         if (Math.random() < 0.3) {
           particle.material.emissive = new THREE.Color(
-            Math.random() < 0.5 ? 0x3d5af1 : 0xff6a88
+            Math.random() < 0.5 ? 0x4A86E8 : 0x55D6C2 // Blue or teal
           );
           particle.material.emissiveIntensity = 0.3;
         }
@@ -408,9 +441,10 @@ const Hero = () => {
             packetGeometry = new THREE.SphereGeometry(0.1, 8, 8);
           }
           
+          // Use professional color palette
           const packetMaterial = new THREE.MeshStandardMaterial({
-            color: j % 2 === 0 ? 0x3d5af1 : 0xff6a88,
-            emissive: j % 2 === 0 ? 0x3d5af1 : 0xff6a88,
+            color: j % 2 === 0 ? 0x4A86E8 : 0x55D6C2, // Blue or teal
+            emissive: j % 2 === 0 ? 0x4A86E8 : 0x55D6C2,
             emissiveIntensity: 0.3,
             metalness: 0.1,
             roughness: 0.8
@@ -451,7 +485,7 @@ const Hero = () => {
       const platform = new THREE.Mesh(platformGeometry, platformMaterial);
       
       // Add grid pattern to the platform
-      const gridHelper = new THREE.GridHelper(30, 30, 0x3d5af1, 0x3d5af1);
+      const gridHelper = new THREE.GridHelper(30, 30, 0x4A86E8, 0x7FACDE); // Updated colors
       gridHelper.position.y = 0.26;
       platform.add(gridHelper);
       
@@ -501,7 +535,7 @@ const Hero = () => {
         // Create the circuit line
         const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
         const lineMaterial = new THREE.LineBasicMaterial({ 
-          color: i % 2 === 0 ? 0x3d5af1 : 0xff6a88,
+          color: i % 2 === 0 ? 0x4A86E8 : 0x55D6C2, // Blue or teal
           transparent: true,
           opacity: 0.5
         });
@@ -512,8 +546,8 @@ const Hero = () => {
         // Add circuit nodes at the endpoints
         const nodeGeometry = new THREE.SphereGeometry(0.2, 8, 8);
         const nodeMaterial = new THREE.MeshStandardMaterial({
-          color: i % 2 === 0 ? 0x3d5af1 : 0xff6a88,
-          emissive: i % 2 === 0 ? 0x3d5af1 : 0xff6a88,
+          color: i % 2 === 0 ? 0x4A86E8 : 0x55D6C2, // Blue or teal
+          emissive: i % 2 === 0 ? 0x4A86E8 : 0x55D6C2,
           emissiveIntensity: 0.3,
           metalness: 0.1,
           roughness: 0.8
@@ -657,27 +691,64 @@ const Hero = () => {
       if (bgAnimation) cancelAnimationFrame(bgAnimation);
       if (controls) controls.dispose();
     };
-  }, []);
+  }, [webGLInitialized]);
 
-  return (
-    <section id="hero" className="hero">
+  // Static content when WebGL is not supported
+  const StaticHero = () => (
+    <div className="hero-container static-hero">
+      <div className="hero-content static-content">
+        <h1>Naveen Vanam</h1>
+        <h2>Specialist Leader at Deloitte Digital</h2>
+        <p>Digital Transformation Expert | AEM & Adobe LiveCycle Specialist | RESTful Web Services</p>
+        <div className="hero-buttons">
+          <a href="#contact" className="btn primary-btn">Get In Touch</a>
+          <a href="#expertise" className="btn secondary-btn">Explore My Work</a>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Dynamic content with Three.js
+  const DynamicHero = () => (
+    <>
       <canvas id="bg-animation" ref={bgCanvasRef}></canvas>
       <div id="page" ref={pageRef}>
         <div className="hero-container">
-        <div className="hero-content">
-          <h1>Naveen Vanam</h1>
-          <h2>Specialist Leader at Deloitte Digital</h2>
-          <p>Digital Transformation Expert | AEM & Adobe LiveCycle Specialist | RESTful Web Services</p>
-          <div className="hero-buttons">
-            <a href="#contact" className="btn primary-btn">Get In Touch</a>
-            <a href="#expertise" className="btn secondary-btn">Explore My Work</a>
-          </div>
+          <div className="hero-content">
+            <h1>Naveen Vanam</h1>
+            <h2>Specialist Leader at Deloitte Digital</h2>
+            <p>Digital Transformation Expert | AEM & Adobe LiveCycle Specialist | RESTful Web Services</p>
+            <div className="hero-buttons">
+              <a href="#contact" className="btn primary-btn">Get In Touch</a>
+              <a href="#expertise" className="btn secondary-btn">Explore My Work</a>
+            </div>
           </div>
           <div className="hero-3d-space"></div>
         </div>
       </div>
-      
       <canvas id="reveal-effect" ref={canvasRef}></canvas>
+    </>
+  );
+
+  // Handle WebGL initialization success
+  const handleWebGLSuccess = () => {
+    setWebGLInitialized(true);
+  };
+
+  // Handle WebGL errors
+  const handleWebGLError = (error) => {
+    console.error('WebGL Error:', error);
+  };
+
+  return (
+    <section id="hero" className="hero">
+      <SafeWebGL 
+        fallback={<StaticHero />}
+        onError={handleWebGLError}
+        onSupported={handleWebGLSuccess}
+      >
+        <DynamicHero />
+      </SafeWebGL>
     </section>
   );
 };
