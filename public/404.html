@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found | Naveen Vanam</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Montserrat', 'Segoe UI', sans-serif;
+      background-color: #0D1117;
+      color: #F5F5F5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 600px;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 3rem;
+      background: linear-gradient(to right, #4A86E8, #55D6C2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    p {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #B0B0C0;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 30px;
+      background: linear-gradient(to right, #4A86E8, #55D6C2);
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .redirect-text {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+  <script>
+    // Redirect to homepage after a brief delay
+    setTimeout(function() {
+      window.location.href = "/";
+    }, 5000);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>404 - Page Not Found</h1>
+    <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+    <a href="/" class="button">Return to Homepage</a>
+    <p class="redirect-text">You will be automatically redirected to the homepage in 5 seconds...</p>
+  </div>
+</body>
+</html> 

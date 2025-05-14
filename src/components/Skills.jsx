@@ -41,7 +41,7 @@ const Skills = () => {
       'XML', 'Project Management', 'Microservices', 'Docker'
     ]
   };
-
+  
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Title animation
@@ -263,16 +263,16 @@ const Skills = () => {
             </div>
           </div>
         </div>
-
+        
         <div className="skills-footer">
           <div className="certification-badge">
             <div className="certification-badge-icon">
               <FaCertificate />
-              </div>
+          </div>
             <div className="certification-badge-content">
               <h4>Project Management Professional (PMP)®</h4>
               <p>PMI - Project Management Institute</p>
-            </div>
+          </div>
           </div>
         </div>
       </div>
